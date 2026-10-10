@@ -81,3 +81,38 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
+
+  # Separate job, after the data is already committed: a broken frontend build
+  # fails this job only and can never block or lose scraped data. Runs only
+  # when the scrape succeeded. Checks out latest main so it publishes the data
+  # that was just pushed.
+  deploy:
+    needs: scrape
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build frontend
+        run: |
+          mkdir -p frontend/public/data
+          cp data/bookings.json data/status.json frontend/public/data/
+          cd frontend && npm ci && npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
