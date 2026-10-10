@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "name": "pacific-county-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node scrape.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0"
+  }
+}
