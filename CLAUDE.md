@@ -15,7 +15,7 @@ Hard constraints for build work:
 - Row counts identical before and after any change that isn't meant to change them.
 - Before/after numbers for anything that changes a published stat.
 - `git pull` before auditing, so the checkout matches deployed main.
-- Backfills go inside the scraper as idempotent migrations, never as a data push from a work session (the workflow's `-X ours` pull silently drops them).
+- Backfills go inside the scraper as idempotent migrations, never as a data push from a work session (it conflicts with the next run's rebase and turns it red).
 
 ## Pending verification
 - [ ] **Release-page window.** Observed Oct 9, 2026: NOVCASKI (released 10/08 14:56) was on `releases.html` at the 13:05 rebuild (~22 h) and gone at 15:05 (~24 h). The 14:05 rebuild wasn't captured. Working assumption: rolling 24 h. Confirm from the first week of real runs (each release's first and last sighting on `releases.html`).
@@ -24,7 +24,7 @@ Hard constraints for build work:
 - [ ] **Timezone of all timestamps.** Assumed Pacific wall-clock (no marker on the page). Prove it by comparing a booking's Booked At with the first hourly rebuild it appears in.
 - [ ] **Hourly rebuild at :05.** Observed 07:05, 08:05, 09:05, 13:05, 15:05 PDT on Oct 9. Re-check from `Last-Modified` logged by real runs, including overnight and weekends.
 - [ ] **Terms of use.** None found on the roster page or county homepage (Oct 9). Not a confirmed permission. Optional: ask the Sheriff's Office / Jail (360-875-9390) and record the answer and date here.
-- [ ] **cron-job.org token expiry** — record here once the trigger job is set up.
+- [ ] **cron-job.org token expires 2027-08-08.** Renew before then (calendar reminder); when it expires every trigger stops silently except for cron-job.org failure emails.
 
 ## Decisions
 - **Public repo + GitHub Pages ("public for now", decided Oct 9, 2026).** Consequence, accepted knowingly: every name in committed JSON and in all git history is public and can't be recalled by going private later. JSON on Pages can't be noindexed. Revisit before the history grows.
@@ -76,9 +76,10 @@ Small roster (~25). Partial-load guard: abort if in-custody drops by more than 5
 Everyone on the roster at the first run gets `firstSeen` = launch. Some were booked long before (earliest seen: 09/07/2025). No stat may start a clock at `firstSeen`.
 
 ## Launch to-dos
-- [ ] **First run:** after the workflow is on `main`, run "Scrape" once by hand (Actions → Scrape → Run workflow) with **allow_fresh_start** ticked. Every later run leaves it unticked. Ticking it when data already exists does nothing (it only applies to missing files).
-- [ ] **Verify the first real run** (standing rule): green, the `N on the county roster` log line, and `data/` committed by github-actions[bot].
-- [ ] **cron-job.org job:** POST `https://api.github.com/repos/recordwatch/Pacific-county-monitor/actions/workflows/scrape.yml/dispatches`, body `{"ref":"main"}`, crontab `10 * * * *` in America/Los_Angeles, failure emails on. Add this repo to the existing fine-grained token's repository access (Actions: Read and write) before creating the job. A 204 on the test run means it worked; confirm a workflow_dispatch run actually started.
+- [x] **First run** (done Oct 10, 2026, run #1, 26 in custody): after the workflow is on `main`, run "Scrape" once by hand (Actions → Scrape → Run workflow) with **allow_fresh_start** ticked. Every later run leaves it unticked. Ticking it when data already exists does nothing (it only applies to missing files).
+- [x] **Verify the first real run** (done Oct 10: green, `26 on the county roster`, `c551f6e` by github-actions[bot]) (standing rule): green, the `N on the county roster` log line, and `data/` committed by github-actions[bot].
+- [x] **cron-job.org job** (set up Oct 10; test run 14:22 green). Still to confirm: the first scheduled :10 run.
+  Job details: POST `https://api.github.com/repos/recordwatch/Pacific-county-monitor/actions/workflows/scrape.yml/dispatches`, body `{"ref":"main"}`, crontab `10 * * * *` in America/Los_Angeles, failure emails on. Add this repo to the existing fine-grained token's repository access (Actions: Read and write) before creating the job. A 204 on the test run means it worked; confirm a workflow_dispatch run actually started.
 - [ ] **Header link to the hub:** the frontend header links to https://wajaildata.org, like the sibling monitors. Build it with the frontend.
 - [ ] **Hub button for Pacific:** once GitHub Pages is live, add a `<a class="nav-btn">` for Pacific County to the `.nav-section` block in `recordwatch/mason-jail-roster`'s `server.js` (serves the wajaildata.org homepage). Needs push access to that repo. Don't add it before the site is live (it would link to a 404).
 
