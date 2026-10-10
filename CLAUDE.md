@@ -75,5 +75,9 @@ Small roster (~25). Partial-load guard: abort if in-custody drops by more than 5
 ### Launch cohort
 Everyone on the roster at the first run gets `firstSeen` = launch. Some were booked long before (earliest seen: 09/07/2025). No stat may start a clock at `firstSeen`.
 
+## Launch to-dos
+- [ ] **Header link to the hub:** the frontend header links to https://wajaildata.org, like the sibling monitors. Build it with the frontend.
+- [ ] **Hub button for Pacific:** once GitHub Pages is live, add a `<a class="nav-btn">` for Pacific County to the `.nav-section` block in `recordwatch/mason-jail-roster`'s `server.js` (serves the wajaildata.org homepage). Needs push access to that repo. Don't add it before the site is live (it would link to a 404).
+
 ## Template
 Built from `recordwatch/whatcom-jail-monitor` (public + Pages, Oct 9 hardening). Fix-once-check-siblings: Whatcom's CLAUDE.md is missing these standing rules.
