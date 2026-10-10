@@ -30,6 +30,7 @@ Hard constraints for build work:
 - **Public repo + GitHub Pages ("public for now", decided Oct 9, 2026).** Consequence, accepted knowingly: every name in committed JSON and in all git history is public and can't be recalled by going private later. JSON on Pages can't be noindexed. Revisit before the history grows.
 - **Cadence: hourly at :10** (5 minutes after the county's :05 rebuild), triggered by cron-job.org via `workflow_dispatch`, no GitHub `schedule`. Rationale: the source can't change faster than hourly, and releases stay listed ~24 h, so an outage under ~22 h loses no county release times.
 - **Scrape all three pages every run** (roster, `bookings.html`, `releases.html`, one at a time with a gap; decided Oct 10, 2026). Someone booked and released between two hourly runs never appears on the roster we see, but does appear on `bookings.html` (with Number and charges) and then `releases.html`. Reading only the roster would miss those short stays entirely.
+- **Parser is strict (decided Oct 10, 2026):** a duplicate Number on one page, or a person with no charges table, fails the whole run instead of merging or skipping. Revisit if either ever fires on a real page.
 - **GR 31:** the Warrant/Citation# column holds court cause numbers (e.g. `25-1-00082-25`). Undecided whether to publish it. Flag before it goes on the frontend.
 
 ## Source map (verified on the live site, Oct 9, 2026)
