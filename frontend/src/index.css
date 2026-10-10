@@ -1,0 +1,388 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #0F1A17;
+  color: #E0F0EA;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+
+.header {
+  background: #0A1311;
+  margin: 0 -1rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 4px solid #2E8B6E;
+  margin-bottom: 0;
+}
+.header-inner { display: flex; align-items: baseline; justify-content: space-between; }
+.header-county { font-family: 'Inter', sans-serif; color: #88A69C; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 0.25rem; }
+.header h1 { font-family: 'Playfair Display', serif; color: #E0F0EA; font-size: 2.5rem; font-weight: 700; letter-spacing: 0.02em; line-height: 1; }
+.header-sub { font-family: 'Inter', sans-serif; color: #88A69C; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.statbar {
+  background: #2E8B6E;
+  margin: 0 -1rem 2rem;
+  padding: 0.6rem 2rem;
+  display: flex;
+  gap: 2rem;
+}
+.stat-num { color: #ECFAF4; font-size: 1.1rem; font-weight: 400; }
+.stat-label { color: #ECFAF4; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-input {
+    width: 100%;
+    min-width: unset;
+  }
+  .filter-tabs {
+    flex-wrap: wrap;
+  }
+  .filter-tabs a, .filter-tabs button {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  background: #16251F;
+  border: 1px solid #355049;
+  padding: 0.5rem 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: #E0F0EA;
+  outline: none;
+}
+.search-input::placeholder { color: #88A69C; }
+.search-input:focus { border-color: #3DB08B; }
+.filter-tabs { display: flex; gap: 0.5rem; }
+.filter-tabs a, .filter-tabs button {
+  background: #16251F;
+  border: 1px solid #355049;
+  padding: 0.4rem 0.9rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  color: #B4D8CB;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.filter-tabs a.active, .filter-tabs button.active {
+  background: #2E8B6E;
+  color: #ECFAF4;
+  border-color: #2E8B6E;
+}
+
+.date-separator {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #8FDCC0;
+  padding: 0.5rem 0 0.5rem;
+  margin-top: 1.25rem;
+  border-bottom: 1px solid #29403A;
+  margin-bottom: 0.75rem;
+}
+
+.log-count {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #88A69C;
+  margin-bottom: 0.75rem;
+}
+.empty, .loading {
+  text-align: center;
+  color: #88A69C;
+  font-size: 0.85rem;
+  padding: 3rem;
+}
+
+.card {
+  border: 1px solid #355049;
+  margin-bottom: 0.5rem;
+  background: #16251F;
+}
+.card-released { opacity: 0.6; }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  gap: 1rem;
+}
+.card-header:hover { background: #1E332C; }
+.card-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #E0F0EA; margin-bottom: 0.2rem; }
+.card-meta { font-size: 0.65rem; color: #88A69C; text-transform: uppercase; letter-spacing: 0.07em; }
+.card-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+.card-toggle { color: #88A69C; font-size: 0.7rem; }
+
+.badge {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid;
+}
+.badge-custody { background: #1D4A3C; border-color: #3DB08B; color: #B0EBD5; }
+.badge-released { background: #16251F; border-color: #355049; color: #88A69C; }
+
+.card-body { padding: 0 1rem 1rem; border-top: 1px solid #355049; }
+.card-release-row {
+  font-size: 0.75rem;
+  color: #88A69C;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #29403A;
+  margin-bottom: 0.75rem;
+}
+
+.charges-title {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #88A69C;
+  margin-bottom: 0.5rem;
+  border-top: 1px solid #29403A;
+  padding-top: 0.75rem;
+}
+.charge-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #29403A;
+}
+.charge-row:last-child { border-bottom: none; }
+.charge-violation { font-size: 0.8rem; color: #E0F0EA; margin-bottom: 0.2rem; }
+.charge-pending { font-size: 0.75rem; color: #88A69C; font-style: italic; }
+.card-time-held { color: #8FDCC0; }
+.card-time-held-detail { color: #8FDCC0; }
+.charge-bail, .charge-court, .charge-agency, .charge-disposition {
+  font-size: 0.68rem;
+  color: #88A69C;
+  margin-top: 0.15rem;
+}
+
+/* History Log */
+.history-log {
+  background: #16251F;
+  border: 1px solid #355049;
+  padding: 1.5rem;
+}
+.history-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #355049;
+}
+.history-header h2 {
+  font-size: 1.3rem;
+  color: #E0F0EA;
+  margin: 0.5rem 0;
+}
+.history-subtitle {
+  font-size: 0.75rem;
+  color: #88A69C;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.back-link {
+  display: inline-block;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8rem;
+  color: #88A69C;
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}
+.back-link:hover { color: #E0F0EA; }
+
+/* Stats page */
+.stats-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #355049;
+  padding-bottom: 1rem;
+}
+.stats-tabs button {
+  background: #16251F;
+  border: 1px solid #355049;
+  padding: 0.4rem 0.85rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8rem;
+  color: #B4D8CB;
+  cursor: pointer;
+}
+.stats-tabs button.active {
+  background: #2E8B6E;
+  color: #ECFAF4;
+  border-color: #2E8B6E;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  background: #16251F;
+  border: 1px solid #355049;
+  padding: 0.9rem 1rem;
+}
+.stat-card-num { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: #E0F0EA; line-height: 1.1; }
+.stat-card-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #88A69C; margin-top: 0.3rem; }
+.stat-card-sub { font-size: 0.65rem; color: #8FDCC0; margin-top: 0.2rem; }
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: #E0F0EA;
+  margin: 1.75rem 0 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #29403A;
+}
+.section-note {
+  font-size: 0.72rem;
+  color: #88A69C;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.hbar-list { margin-bottom: 0.5rem; }
+.hbar-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 90px;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+.hbar-label { font-size: 0.75rem; color: #B4D8CB; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar-track { background: #16251F; border: 1px solid #29403A; height: 0.9rem; }
+.hbar-fill { background: #2E8B6E; height: 100%; }
+.hbar-value { font-size: 0.72rem; color: #88A69C; text-align: right; }
+.hbar-pct { color: #668578; }
+@media (max-width: 600px) {
+  .hbar-row { grid-template-columns: 100px 1fr 70px; }
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  font-size: 0.75rem;
+}
+.stats-table th, .stats-table td {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #29403A;
+  color: #B4D8CB;
+}
+.stats-table th {
+  color: #88A69C;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  font-weight: 400;
+}
+
+.agency-block { padding: 0.75rem 0; border-bottom: 1px solid #29403A; }
+.agency-name { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: #E0F0EA; }
+.agency-meta { font-size: 0.65rem; color: #88A69C; margin: 0.2rem 0 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.agency-top-charges { list-style: none; padding: 0; margin: 0; font-size: 0.75rem; color: #B4D8CB; }
+.agency-top-charges li { padding: 0.15rem 0; }
+
+.history-day {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #29403A;
+}
+.history-day:last-child {
+  border-bottom: none;
+}
+.history-date {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #E0F0EA;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0.75rem;
+  background: #0F1A17;
+  display: inline-block;
+}
+.history-section {
+  margin-bottom: 1.5rem;
+}
+.history-section:last-child {
+  margin-bottom: 0;
+}
+.history-section-title {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #3DB08B;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid #3DB08B;
+}
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.history-item {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #173A2F;
+  border-left: 2px solid #355049;
+}
+.history-item:hover {
+  background: #1E332C;
+}
+.history-name {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: #E0F0EA;
+  margin-bottom: 0.25rem;
+}
+.history-meta {
+  display: block;
+  font-size: 0.72rem;
+  color: #88A69C;
+}
+.history-time-served {
+  color: #8FDCC0;
+  font-weight: 500;
+}
+.history-charges {
+  display: block;
+  margin-top: 0.25rem;
+  color: #A6D6C6;
+  font-style: italic;
+}
+
+/* Pacific additions */
+.header-hub { font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8FDCC0; text-decoration: none; }
+.header-hub:hover { text-decoration: underline; }
+.charge-meta { font-size: 0.7rem; color: #88A69C; margin-top: 0.15rem; }
+.card-approx { color: #88A69C; font-style: italic; }
+.caveats { font-size: 0.72rem; color: #88A69C; line-height: 1.5; margin: 0.5rem 0 1.25rem; padding-left: 1rem; }
