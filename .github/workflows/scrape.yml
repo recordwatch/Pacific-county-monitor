@@ -1,0 +1,83 @@
+name: Scrape
+
+# Triggered externally by cron-job.org hourly at :10 (5 minutes after the
+# county's :05 rebuild) through the workflow_dispatch API. No GitHub
+# `schedule`: on sibling repos it ran only 11-13% of scheduled runs, and
+# keeping both would double up.
+on:
+  workflow_dispatch:
+    inputs:
+      allow_big_drop:
+        description: 'Allow in-custody to drop by more than 5 people and 10% in one run (only if the drop is real)'
+        type: boolean
+        default: false
+      allow_fresh_start:
+        description: 'First run only: start from empty when data files are missing (harmless if they exist)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# Never run two scrapes at once; a second trigger waits for the first.
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+env:
+  TZ: America/Los_Angeles
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # ref: main so a run that sat queued starts from the latest data, not
+      # the commit that existed when it was triggered.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Broken code fails here, before it can touch the data.
+      - name: Test
+        run: npm test
+
+      # Writes nothing when it fails (guard, bad page, network), so a red
+      # run never commits partial data.
+      - name: Run scraper
+        run: node scrape.js
+        env:
+          ALLOW_BIG_DROP: ${{ inputs.allow_big_drop && '1' || '' }}
+          ALLOW_FRESH_START: ${{ inputs.allow_fresh_start && '1' || '' }}
+
+      # Data is committed right after the scrape. Any frontend build added
+      # later goes after this step (or in its own job), so a broken build can
+      # never throw away scraped data. Rebase, not `-X ours`: if someone else
+      # pushed data in the meantime the rebase conflicts and the run goes red
+      # instead of silently keeping one side.
+      - name: Commit data
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -d data ] || { echo "No data/ folder (scraper wrote nothing)."; exit 0; }
+          git add data/
+          if git diff --cached --quiet; then echo "No data changes."; exit 0; fi
+          git commit -m "chore: update data [skip ci]"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            echo "Push attempt $i failed; retrying."
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          exit 1

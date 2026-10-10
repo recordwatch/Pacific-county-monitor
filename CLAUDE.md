@@ -76,6 +76,9 @@ Small roster (~25). Partial-load guard: abort if in-custody drops by more than 5
 Everyone on the roster at the first run gets `firstSeen` = launch. Some were booked long before (earliest seen: 09/07/2025). No stat may start a clock at `firstSeen`.
 
 ## Launch to-dos
+- [ ] **First run:** after the workflow is on `main`, run "Scrape" once by hand (Actions → Scrape → Run workflow) with **allow_fresh_start** ticked. Every later run leaves it unticked. Ticking it when data already exists does nothing (it only applies to missing files).
+- [ ] **Verify the first real run** (standing rule): green, the `N on the county roster` log line, and `data/` committed by github-actions[bot].
+- [ ] **cron-job.org job:** POST `https://api.github.com/repos/recordwatch/Pacific-county-monitor/actions/workflows/scrape.yml/dispatches`, body `{"ref":"main"}`, crontab `10 * * * *` in America/Los_Angeles, failure emails on. Add this repo to the existing fine-grained token's repository access (Actions: Read and write) before creating the job. A 204 on the test run means it worked; confirm a workflow_dispatch run actually started.
 - [ ] **Header link to the hub:** the frontend header links to https://wajaildata.org, like the sibling monitors. Build it with the frontend.
 - [ ] **Hub button for Pacific:** once GitHub Pages is live, add a `<a class="nav-btn">` for Pacific County to the `.nav-section` block in `recordwatch/mason-jail-roster`'s `server.js` (serves the wajaildata.org homepage). Needs push access to that repo. Don't add it before the site is live (it would link to a 404).
 
