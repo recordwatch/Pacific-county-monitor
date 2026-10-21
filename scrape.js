@@ -21,6 +21,11 @@ const GUARD_MIN_FRACTION = 0.10;
 // little. County release times this far outside a booking's window still
 // count as inside it.
 const MATCH_TOLERANCE_MS = 10 * 60 * 1000;
+// The roster can still list someone after the county's recorded release time
+// (Oct 20, 2026: listed at the 13:05 rebuild, released 12:49:50). So a county
+// time may fall this far before the last roster sighting. The exactly-one-
+// candidate rule still applies, so a wider window can't pair two people.
+const ROSTER_LAG_MS = 60 * 60 * 1000;
 
 export class GuardError extends Error {}
 
@@ -114,9 +119,10 @@ function matchCountyReleases(bookings, releaseRows, log) {
     if (sameName.some(b => b.releaseSource === 'county' && b.releasedAtRaw === row.releasedAtRaw)) continue; // already matched
     const inWindow = sameName.filter(b => {
       if (b.status !== 'released' || b.releaseSource !== 'detected') return false;
-      const start = Math.max(ms(b.bookedAt) || -Infinity, ms(b.lastSeenInCustodyAt) || -Infinity);
+      const start = Math.max((ms(b.bookedAt) || -Infinity) - MATCH_TOLERANCE_MS,
+                             (ms(b.lastSeenInCustodyAt) || -Infinity) - ROSTER_LAG_MS);
       const end = ms(b.detectedReleasedAt);
-      return t >= start - MATCH_TOLERANCE_MS && t <= end + MATCH_TOLERANCE_MS;
+      return t >= start && t <= end + MATCH_TOLERANCE_MS;
     });
     const stillIn = sameName.filter(b => b.status === 'in_custody');
     if (inWindow.length === 1 && stillIn.length === 0) {
