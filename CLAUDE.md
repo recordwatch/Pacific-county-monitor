@@ -1,5 +1,7 @@
 # Pacific County Jail Roster Monitor — Project Context
 
+Live site: https://recordwatch.github.io/Pacific-county-monitor/ (GitHub Pages from the `gh-pages` branch, deployed by the workflow's `deploy` job after every successful scrape).
+
 ## Standing rules (every session, before any work)
 1. Always paste the full, real diff. Never a summary.
 2. Never commit until the user replies "commit".
@@ -18,11 +20,13 @@ Hard constraints for build work:
 - Backfills go inside the scraper as idempotent migrations, never as a data push from a work session (it conflicts with the next run's rebase and turns it red).
 
 ## Pending verification
-- [ ] **Release-page window.** Observed Oct 9, 2026: NOVCASKI (released 10/08 14:56) was on `releases.html` at the 13:05 rebuild (~22 h) and gone at 15:05 (~24 h). The 14:05 rebuild wasn't captured. Working assumption: rolling 24 h. Confirm from the first week of real runs (each release's first and last sighting on `releases.html`).
-- [ ] **Bookings-page window.** LEITCH (booked 10/09 10:22) listed at 15:05 the same day; two 10/07 bookings were not listed on 10/09 morning. Window is somewhere under ~40 h; assumed 24 h. Confirm from real runs.
-- [ ] **Number = person ID, not booking ID.** Inferred from VINE `offenderID` and low numbers on long-known people (33136) vs. new ones (203336). Confirm the first time someone is rebooked: same Number, new Booked At?
-- [ ] **Timezone of all timestamps.** Assumed Pacific wall-clock (no marker on the page). Prove it by comparing a booking's Booked At with the first hourly rebuild it appears in.
-- [ ] **Hourly rebuild at :05.** Observed 07:05, 08:05, 09:05, 13:05, 15:05 PDT on Oct 9. Re-check from `Last-Modified` logged by real runs, including overnight and weekends.
+- [x] **Release-page window: rolling ~24 h** (confirmed Oct 20, 2026). 6 release rows tracked start to finish: each was first seen 0.2–1.3 h after its Released At and last seen 22.6–24.1 h after it.
+- [ ] **Bookings-page window.** Live check Oct 20 17:05: bookings 0.9–6.1 h old were listed; one booked 30 h earlier was not. So somewhere between 6 h and 30 h, assumed 24 h. The scraper doesn't log bookings-page sightings, so this can only be checked by hand (or by adding that log).
+- [x] **Number = person ID** (confirmed Oct 12, 2026): Number 140232 was on the roster with Booked At 09/14/2026, then the same Number appeared with a new Booked At 07:59 10/12/2026. Two separate booking records, as designed.
+- [x] **Timestamps are Pacific wall-clock** (confirmed Oct 20, 2026): all 5 post-launch roster bookings first appeared in the first rebuild 0.1–1.1 h after their Booked At. UTC would be 7 h off.
+- [x] **Hourly rebuild at :05** (confirmed Oct 20, 2026): all 243 runs Oct 10–20, overnight and weekends included, read a roster rebuilt at minute :05 of that same hour; never stale.
+- [ ] **County release times can come before our last roster sighting.** Oct 20: Number 4483 was still on the 13:05 rebuild, but the county lists their release at 12:49:50. That's 15 min before, outside the 10-min `MATCH_TOLERANCE_MS` in `scrape.js`, so it stayed `detected`. Fix proposed (not made): allow county times up to ~60 min before `lastSeenInCustodyAt`. Any fix must keep the exactly-one-candidate rule.
+- [ ] **Paperwork rebooking (Number 140232, Oct 12).** Booked on a new case at 07:59:19, and one county release row at 08:00:49. Both bookings left the roster within two runs, so the row matched two candidates and both stayed `detected`. That's correct by the ambiguity rule. A release and rebooking minutes apart is paperwork, not a return: count it that way in any future repeat-booking stat.
 - [ ] **Terms of use.** None found on the roster page or county homepage (Oct 9). Not a confirmed permission. Optional: ask the Sheriff's Office / Jail (360-875-9390) and record the answer and date here.
 - [ ] **cron-job.org token expires 2027-08-08.** Renew before then (calendar reminder); when it expires every trigger stops silently except for cron-job.org failure emails.
 
@@ -31,7 +35,7 @@ Hard constraints for build work:
 - **Cadence: hourly at :10** (5 minutes after the county's :05 rebuild), triggered by cron-job.org via `workflow_dispatch`, no GitHub `schedule`. Rationale: the source can't change faster than hourly, and releases stay listed ~24 h, so an outage under ~22 h loses no county release times.
 - **Scrape all three pages every run** (roster, `bookings.html`, `releases.html`, one at a time with a gap; decided Oct 10, 2026). Someone booked and released between two hourly runs never appears on the roster we see, but does appear on `bookings.html` (with Number and charges) and then `releases.html`. Reading only the roster would miss those short stays entirely.
 - **Parser is strict (decided Oct 10, 2026):** a duplicate Number on one page, or a person with no charges table, fails the whole run instead of merging or skipping. Revisit if either ever fires on a real page.
-- **GR 31:** the Warrant/Citation# column holds court cause numbers (e.g. `25-1-00082-25`). Undecided whether to publish it. Flag before it goes on the frontend.
+- **GR 31: case numbers are shown** on charge cards (decided Oct 10, 2026). The Warrant/Citation# column holds court cause numbers (e.g. `25-1-00082-25`), and this is court-case data, so it's public along with everything else in this repo.
 
 ## Source map (verified on the live site, Oct 9, 2026)
 Three static HTML pages on IIS, all rebuilt together every hour at about :05 (same `Last-Modified` on all three). Also the VINE link per person. No JSON, no PDF, no pagination, no detail pages.
@@ -70,7 +74,11 @@ Columns: Arrest Date, Arresting Agency, Court, Billing Agency, Bond Type, Bond A
 - No rebuild/maintenance page seen yet. Any page missing `#main-table` fails the run.
 
 ### Population and guards
-Small roster (~25). Partial-load guard: abort if in-custody drops by more than 5 people **and** more than 10%; with ~25 people, the 5-person rule is what trips it. Override via workflow input. Not backtestable until real history exists — backtest from `data/status.json` commit history after a few weeks.
+Small roster (~25). Partial-load guard: abort if in-custody drops by more than 5 people **and** more than 10%; with ~25 people, the 5-person rule is what trips it. Override via workflow input.
+Backtest (Oct 10–20, 2026, 243 runs from `data/status.json` history): in custody ranged 20–26, the largest run-over-run drop was 1, and the guard would have tripped 0 times.
+
+### Run frequency (from `data/status.json` commit history)
+Oct 10–20, 2026: 243 runs, 4 missed hours (single 2-h gaps on Oct 15, 16 and twice on Oct 17), no longer gaps. The one failure inspected (Oct 10, 14:37) was the county site timing out twice; with a ~24 h release window a missed hour loses nothing.
 
 ### Launch cohort
 Everyone on the roster at the first run gets `firstSeen` = launch. Some were booked long before (earliest seen: 09/07/2025). No stat may start a clock at `firstSeen`.
@@ -78,9 +86,10 @@ Everyone on the roster at the first run gets `firstSeen` = launch. Some were boo
 ## Launch to-dos
 - [x] **First run** (done Oct 10, 2026, run #1, 26 in custody): after the workflow is on `main`, run "Scrape" once by hand (Actions → Scrape → Run workflow) with **allow_fresh_start** ticked. Every later run leaves it unticked. Ticking it when data already exists does nothing (it only applies to missing files).
 - [x] **Verify the first real run** (done Oct 10: green, `26 on the county roster`, `c551f6e` by github-actions[bot]) (standing rule): green, the `N on the county roster` log line, and `data/` committed by github-actions[bot].
-- [x] **cron-job.org job** (set up Oct 10; test run 14:22 green). Still to confirm: the first scheduled :10 run.
+- [x] **cron-job.org job** (set up Oct 10; test run 14:22 green; first scheduled run 15:10 Oct 10 green and deployed).
   Job details: POST `https://api.github.com/repos/recordwatch/Pacific-county-monitor/actions/workflows/scrape.yml/dispatches`, body `{"ref":"main"}`, crontab `10 * * * *` in America/Los_Angeles, failure emails on. Add this repo to the existing fine-grained token's repository access (Actions: Read and write) before creating the job. A 204 on the test run means it worked; confirm a workflow_dispatch run actually started.
-- [ ] **Header link to the hub:** the frontend header links to https://wajaildata.org, like the sibling monitors. Build it with the frontend.
+- [x] **Header link to the hub** (done Oct 10): the frontend header links to https://wajaildata.org.
+- [x] **GitHub Pages on** (Oct 10): Settings → Pages → Deploy from a branch → `gh-pages` / root. Not `main`, which has no `index.html` and 404s.
 - [ ] **Hub button for Pacific:** once GitHub Pages is live, add a `<a class="nav-btn">` for Pacific County to the `.nav-section` block in `recordwatch/mason-jail-roster`'s `server.js` (serves the wajaildata.org homepage). Needs push access to that repo. Don't add it before the site is live (it would link to a 404).
 
 ## Template
