@@ -163,6 +163,29 @@ test('no county time when it falls outside the release window', async () => {
   assert.equal(read(dir)[bookingId(person(1000))].releaseSource, 'detected');
 });
 
+test('county time up to 60 min before the last roster sighting still matches (roster lag)', async () => {
+  const dir = await launched(); // last on the roster at the 10:05 rebuild
+  await run(dir, pages({ roster: roster25().slice(1), releases: [release('PERSON, NUMBER 1000', '09:50:00 10/10/2026')], builtAt: '2026-10-10T11:05:00-07:00' }), { now: '2026-10-10T11:10:00-07:00' });
+  const b = read(dir)[bookingId(person(1000))];
+  assert.equal(b.releaseSource, 'county');
+  assert.equal(b.releasedAt, '2026-10-10T09:50:00-07:00');
+});
+
+test('county time more than 60 min before the last roster sighting does not match', async () => {
+  const dir = await launched();
+  await run(dir, pages({ roster: roster25().slice(1), releases: [release('PERSON, NUMBER 1000', '09:00:00 10/10/2026')], builtAt: '2026-10-10T11:05:00-07:00' }), { now: '2026-10-10T11:10:00-07:00' });
+  assert.equal(read(dir)[bookingId(person(1000))].releaseSource, 'detected');
+});
+
+test('county time before Booked At never matches, even inside the roster-lag window', async () => {
+  const dir = await launched();
+  const quick = person(3000, 'QUICK, STAY', '10:20:00 10/10/2026');
+  await run(dir, pages({ roster: [...roster25(), quick] }), { now: '2026-10-10T10:25:00-07:00' });
+  // Released "10:00", 20 min before this booking: can't be this stay.
+  await run(dir, pages({ roster: roster25(), releases: [release('QUICK, STAY', '10:00:00 10/10/2026')], builtAt: '2026-10-10T11:05:00-07:00' }), { now: '2026-10-10T11:10:00-07:00' });
+  assert.equal(read(dir)[bookingId(quick)].releaseSource, 'detected');
+});
+
 test('two release rows with one name match nobody', async () => {
   const dir = await launched();
   await run(dir, pages({ roster: roster25().slice(1), releases: [release('PERSON, NUMBER 1000', '10:30:00 10/10/2026'), release('PERSON, NUMBER 1000', '10:45:00 10/10/2026')], builtAt: '2026-10-10T11:05:00-07:00' }), { now: '2026-10-10T11:10:00-07:00' });
