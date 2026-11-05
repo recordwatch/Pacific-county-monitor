@@ -386,3 +386,13 @@ body {
 .charge-meta { font-size: 0.7rem; color: #88A69C; margin-top: 0.15rem; }
 .card-approx { color: #88A69C; font-style: italic; }
 .caveats { font-size: 0.72rem; color: #88A69C; line-height: 1.5; margin: 0.5rem 0 1.25rem; padding-left: 1rem; }
+
+.contact-footer {
+  max-width: 900px;
+  margin: 2.5rem auto 0;
+  padding: 1rem 1rem 2rem;
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+.contact-footer a { color: inherit; text-decoration: underline; }

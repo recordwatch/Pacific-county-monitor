@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
 import Header from './components/Header'
+import ContactFooter from './components/ContactFooter'
 import StatBar from './components/StatBar'
 import BookingCard from './components/BookingCard'
 import StatsPage from './components/StatsPage'
@@ -87,6 +88,7 @@ export default function App() {
         )}</Page>} />
         <Route path="/stats" element={<Page>{({ bookings, status }) => <StatsPage bookings={bookings} status={status} />}</Page>} />
       </Routes>
+      <ContactFooter />
     </HashRouter>
   )
 }
