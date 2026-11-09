@@ -1,13 +1,13 @@
 {
- "inCustody": 23,
- "lastUpdated": "2026-11-09T14:10:27-08:00",
+ "inCustody": 24,
+ "lastUpdated": "2026-11-09T15:10:18-08:00",
  "countyLastModified": {
-  "roster": "2026-11-09T14:05:04-08:00",
-  "bookings": "2026-11-09T14:05:04-08:00",
-  "releases": "2026-11-09T14:05:05-08:00"
+  "roster": "2026-11-09T15:05:05-08:00",
+  "bookings": "2026-11-09T15:05:05-08:00",
+  "releases": "2026-11-09T15:05:05-08:00"
  },
  "lastRun": {
-  "new": 0,
+  "new": 1,
   "released": 0,
   "reappeared": 0,
   "rebooked": 0,
