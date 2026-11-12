@@ -46,15 +46,21 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
-      # Broken code fails here, before it can touch the data.
+      # Broken code fails here, before it can touch the data. This one stays
+      # loud: a failing test means the code itself is broken.
       - name: Test
         run: npm test
 
-      # Writes nothing when it fails (guard, bad page, network), so a red
-      # run never commits partial data.
+      # Writes nothing when it fails (guard, bad page, network), so a failed
+      # run never commits partial data. A failure doesn't end the run here:
+      # the health step decides whether it's been broken long enough to email.
       - name: Run scraper
+        id: scrape
+        continue-on-error: true
+        timeout-minutes: 7
         run: node scrape.js
         env:
           ALLOW_BIG_DROP: ${{ inputs.allow_big_drop && '1' || '' }}
@@ -65,13 +71,26 @@ jobs:
       # never throw away scraped data. Rebase, not `-X ours`: if someone else
       # pushed data in the meantime the rebase conflicts and the run goes red
       # instead of silently keeping one side.
+      - name: Record scraper health
+        id: health
+        run: |
+          if [ "${{ steps.scrape.outcome }}" = success ]; then
+            bash .github/scripts/scrape-health.sh success
+          else
+            # Keep the last good data, not whatever a failed run half-wrote.
+            git checkout -- data/ 2>/dev/null || true
+            git clean -fdq data/ 2>/dev/null || true
+            bash .github/scripts/scrape-health.sh failure
+          fi
+
       - name: Commit data
         if: ${{ !cancelled() }}
+        continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           [ -d data ] || { echo "No data/ folder (scraper wrote nothing)."; exit 0; }
-          git add data/
+          git add data/ .github/scrape-health.json
           if git diff --cached --quiet; then echo "No data changes."; exit 0; fi
           git commit -m "chore: update data [skip ci]"
           for i in 1 2 3; do
@@ -82,13 +101,19 @@ jobs:
           done
           exit 1
 
+      - name: Fail if the scraper has been broken for 24 hours
+        if: steps.health.outputs.fail == 'true'
+        run: exit 1
+
   # Separate job, after the data is already committed: a broken frontend build
   # fails this job only and can never block or lose scraped data. Runs only
   # when the scrape succeeded. Checks out latest main so it publishes the data
   # that was just pushed.
+  # Publishing problems never fail the workflow; the next run republishes.
   deploy:
     needs: scrape
     runs-on: ubuntu-latest
+    continue-on-error: true
     timeout-minutes: 10
     concurrency:
       group: pages-deploy
