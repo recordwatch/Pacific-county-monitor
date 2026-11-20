@@ -262,5 +262,13 @@
   "firstSeenAt": "2026-11-17T17:05:04-08:00",
   "lastSeenAt": "2026-11-18T15:05:05-08:00",
   "matchedBookingId": "205158|20:20:55 11/16/2026"
+ },
+ {
+  "name": "FISKVIK, COREY CHARLES",
+  "releasedAt": "2026-11-19T15:58:32-08:00",
+  "releasedAtRaw": "15:58:32 11/19/2026",
+  "firstSeenAt": "2026-11-19T17:05:05-08:00",
+  "lastSeenAt": "2026-11-19T17:05:05-08:00",
+  "matchedBookingId": "180473|01:29:10 11/19/2026"
  }
 ]
