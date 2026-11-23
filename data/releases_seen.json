@@ -326,5 +326,13 @@
   "firstSeenAt": "2026-11-21T14:05:02-08:00",
   "lastSeenAt": "2026-11-22T13:05:03-08:00",
   "matchedBookingId": "72132|23:17:33 10/31/2026"
+ },
+ {
+  "name": "RAITANO STRABBING, SHANE LEE",
+  "releasedAt": "2026-11-23T13:19:15-08:00",
+  "releasedAtRaw": "13:19:15 11/23/2026",
+  "firstSeenAt": "2026-11-23T14:05:04-08:00",
+  "lastSeenAt": "2026-11-23T14:05:04-08:00",
+  "matchedBookingId": "16269|19:39:34 11/11/2026"
  }
 ]
